@@ -1,25 +1,23 @@
-import {test, expect} from '@playwright/test'
-import {CartPage} from '../pages/CartPage'
+import { test } from '../fixtures/apiContext'
+import { expect } from '@playwright/test'
 
-
-
-test('practicing', async ({page}) =>{
-  const cartPage = new CartPage(page)
-  await page.route('**/api/cart', async (route) => {
-    await route.fulfill({
-      status:200,
-      body: JSON.stringify({
-        items: ['laptop'],
-        total: 999
-       }
-      )
+test('practicing', async ({ apiContext }) => {
+    const response = await apiContext.post('/api/login', {
+        data: { email: 'eve.holt@reqres.in', password: 'cityslicka' }
     })
-  })
 
-  await cartPage.goto()
-  await Promise.all([
-    cartPage.waitForCartUpdate(),
-    cartPage.addItem()
-  ])
-  await expect(page.locator('#cart-total')).toHaveText('999')
+    const body = await response.json()
+    const token = body.token
+
+    const response2 = await apiContext.get('/api/users/2', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+
+    expect(response2.status()).toBe(200)
+    const body2 = await response2.json()
+    expect(body2.data.id).toBe(2)
 })
+
+
