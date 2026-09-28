@@ -1,23 +1,11 @@
-import { test } from '../fixtures/apiContext'
-import { expect } from '@playwright/test'
+import {test, expect} from '@playwright/test'
+import { TextBoxPage } from '../pages/TextBoxPage'
 
-test('practicing', async ({ apiContext }) => {
-    const response = await apiContext.post('/api/login', {
-        data: { email: 'eve.holt@reqres.in', password: 'cityslicka' }
-    })
 
-    const body = await response.json()
-    const token = body.token
+test('practicing', async ({page}) =>{
+    const textBoxPage = new TextBoxPage(page)
+    await textBoxPage.goto()
+    await textBoxPage.fillForm('Conan Lopez', 'conan290lopez@gmail.com')
 
-    const response2 = await apiContext.get('/api/users/2', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-
-    expect(response2.status()).toBe(200)
-    const body2 = await response2.json()
-    expect(body2.data.id).toBe(2)
+    await expect(page.getByText('Conan Lopez')).toBeVisible()
 })
-
-
